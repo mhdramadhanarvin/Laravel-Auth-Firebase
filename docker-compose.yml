@@ -1,0 +1,45 @@
+version: '2.0'
+services:
+
+#PHP Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: laravel-auth-firebase:latest
+    container_name: app
+    restart: unless-stopped
+    tty: true
+    working_dir: /var/www/html/
+    command: php artisan serve --host 0.0.0.0
+    ports:
+      - 8000:8000
+    volumes:
+      - ./:/var/www/html/
+    networks:
+      - app-network
+
+  #MySQL Service
+  db:
+    image: mysql:5.7
+    container_name: db
+    restart: unless-stopped
+    tty: true
+    environment:
+      MYSQL_DATABASE: laravel_web
+      MYSQL_ROOT_PASSWORD: replace_mysql_root_password
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - dbdata:/var/lib/mysql/
+    networks:
+      - app-network
+
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge
+#Volumes
+volumes:
+  dbdata:
+    driver: local
