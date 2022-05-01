@@ -26,10 +26,8 @@ services:
     restart: unless-stopped
     tty: true
     environment:
-      MYSQL_DATABASE: laravel_web
-      MYSQL_ROOT_PASSWORD: replace_mysql_root_password
-      SERVICE_TAGS: dev
-      SERVICE_NAME: mysql
+      MYSQL_DATABASE: laravel_auth
+      MYSQL_ROOT_PASSWORD: password  
     volumes:
       - dbdata:/var/lib/mysql/
     networks:
