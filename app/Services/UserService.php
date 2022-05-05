@@ -17,21 +17,13 @@ class UserService
         $this->auth = app('firebase.auth');
     }
 
-    public function createUser($name, $email, $password)
+    public function createUser($userData)
+    { 
+        // return $this->auth->createUserWithEmailAndPassword($userData); 
+    }
+    
+    public function checkEmailExist($email) 
     {
-        // try {
-            $userData = [
-                'email' => $email,
-                'emailVerified' => false,
-                'password' => $password,
-                'displayName' => $name,
-                'disabled' => false,
-            ];
-            $this->auth->createUser($userData);
-        // } catch (\Kreait\Firebase\Exception\FirebaseException $e) {
-        //     // return $e->getMessage();
-        //     dd($e);
-        //     // return redirect()->back()->with('success', 'your message,here');   
-        // }
+        return $this->auth->getUserByEmail($email) ?? true;
     }
 }
