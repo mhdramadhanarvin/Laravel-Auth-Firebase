@@ -19,7 +19,7 @@ class UserService
 
     public function createUser($name, $email, $password)
     {
-        try {
+        // try {
             $userData = [
                 'email' => $email,
                 'emailVerified' => false,
@@ -27,9 +27,11 @@ class UserService
                 'displayName' => $name,
                 'disabled' => false,
             ];
-            return $this->auth->createUser($userData);
-        } catch (\Kreait\Firebase\Exception\FirebaseException $e) {
-            return new \Exception($e->getMessage());
-        }
+            $this->auth->createUser($userData);
+        // } catch (\Kreait\Firebase\Exception\FirebaseException $e) {
+        //     // return $e->getMessage();
+        //     dd($e);
+        //     // return redirect()->back()->with('success', 'your message,here');   
+        // }
     }
 }

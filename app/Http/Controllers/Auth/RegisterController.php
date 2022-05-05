@@ -6,9 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use App\Models\User;
 use App\Services\UserService;
+use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Kreait\Firebase\Auth as FirebaseAuth;
+use Kreait\Firebase\Exception\FirebaseException;
 
 class RegisterController extends Controller
 {
@@ -24,6 +27,7 @@ class RegisterController extends Controller
     */
 
     use RegistersUsers;
+    protected $auth;
 
     /**
      * Where to redirect users after registration.
@@ -40,6 +44,7 @@ class RegisterController extends Controller
     public function __construct()
     {
         $this->middleware('guest');
+        // $this->auth = $auth;
     }
 
     /**
@@ -63,14 +68,42 @@ class RegisterController extends Controller
      * @param  array  $data
      * @return \App\Models\User
      */
-    protected function create(array $data)
-    {
-        // dd($data);
-        // return User::create([
-        //     'name' => $data['name'],
-        //     'email' => $data['email'],
-        //     'password' => Hash::make($data['password']),
-        // ]);
-        (new UserService)->createUser($data['name'], $data['email'], $data['password']);
+    // protected function create(array $data)
+    // {
+    //     // dd($data);
+    //     // return User::create([
+    //     //     'name' => $data['name'],
+    //     //     'email' => $data['email'],
+    //     //     'password' => Hash::make($data['password']),
+    //     // ]);
+    //     try {
+    //         return (new UserService)->createUser($data['name'], $data['email'], $data['password']);   
+    //     } catch (\Exception $e) {
+    //         // dd($e->getMessage());
+    //         // return back()->with($e->getMessage());
+    //         return back()->withErrors([
+    //             'email' => 'Snap! you are done!'
+    //         ]);
+    //         die;
+    //     }
+    // }
+    
+    protected function register(Request $request) {
+       try {
+         $this->validator($request->all())->validate();
+         $userProperties = [
+            'email' => $request->input('email'),
+            'emailVerified' => false,
+            'password' => $request->input('password'),
+            'displayName' => $request->input('name'),
+            'disabled' => false,
+         ];
+         dd($userProperties);
+        //  $createdUser = $this->auth->createUser($userProperties);
+        //  return redirect()->route('login');
+       } catch (FirebaseException $e) {
+          Session::flash('error', $e->getMessage());
+          return back()->withInput();
+       }
     }
 }
