@@ -17,14 +17,35 @@ class UserService
         $this->auth = app('firebase.auth');
     }
 
-    public function createUser($email, $password)
-    { 
-        return $this->auth->createUserWithEmailAndPassword($email, $password);
-    }
-    
-    public function checkEmailExist($email) 
+    public function createUser($name, $email, $password)
     {
-        // return $this->auth->getUserByEmail($email) ?? true;
-        return $this->auth->Auth->fetchSignInMethodsForEmail($email);
+        $dataUser = [
+            'email' => $email,
+            'emailVerified' => false,
+            'password' => $password,
+            'displayName' => $name,
+            'disabled' => false,
+        ];
+        return $this->auth->createUser($dataUser);
+    }
+
+    public function checkEmailExist($email)
+    {
+        try {
+            $getUser = $this->getUserByEmail($email);
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    public function getUserByEmail($email)
+    {
+        return $this->auth->getUserByEmail($email);
+    }
+
+    public function signInWithEmailandPassword($email, $password)
+    {
+        return $this->auth->signInWithEmailandPassword($email, $password);
     }
 }

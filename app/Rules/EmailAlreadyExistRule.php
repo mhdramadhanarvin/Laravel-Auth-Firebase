@@ -26,7 +26,7 @@ class EmailAlreadyExistRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        return (!$this->userService->checkEmailExist($value)); 
+        return (!$this->userService->checkEmailExist($value));
     }
 
     /**
@@ -36,6 +36,6 @@ class EmailAlreadyExistRule implements Rule
      */
     public function message()
     {
-        return ':Attribute already in use.';
+        return ':Attribute already exist.';
     }
 }
