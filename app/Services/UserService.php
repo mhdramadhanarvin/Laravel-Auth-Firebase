@@ -17,13 +17,14 @@ class UserService
         $this->auth = app('firebase.auth');
     }
 
-    public function createUser($userData)
+    public function createUser($email, $password)
     { 
-        // return $this->auth->createUserWithEmailAndPassword($userData); 
+        return $this->auth->createUserWithEmailAndPassword($email, $password);
     }
     
     public function checkEmailExist($email) 
     {
-        return $this->auth->getUserByEmail($email) ?? true;
+        // return $this->auth->getUserByEmail($email) ?? true;
+        return $this->auth->Auth->fetchSignInMethodsForEmail($email);
     }
 }

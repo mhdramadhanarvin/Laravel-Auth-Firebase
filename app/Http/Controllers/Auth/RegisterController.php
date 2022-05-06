@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Kreait\Firebase\Auth as FirebaseAuth;
 use Kreait\Firebase\Exception\FirebaseException;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\RegisterRequest;
 
 class RegisterController extends Controller
 {
@@ -59,26 +61,23 @@ class RegisterController extends Controller
     { 
         return Validator::make($data, [
             'name' => ['required'],
-            'email' => ['required', 'email', new EmailAlreadyExistRule],
+            'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
     } 
     
-    protected function register(Request $request) 
+    protected function register(RegisterRequest $request) 
     { 
         try {
-            $this->validator($request->all())->validate(); 
-            $userProperties = [
-                'email' => $request->input('email'),
-                'emailVerified' => false,
-                'password' => $request->input('password'),
-                'displayName' => $request->input('name'),
-                'disabled' => false,
-            ];
-            $createdUser = $this->userService->createUser($userProperties);
-            // return redirect()->route('login');
-            dd($createdUser);
+            // $this->validator($request->all())->validate();  
+            $createdUser = $this->userService->createUser($request->email, $request->password);
+            return redirect()->route('login'); 
         } catch (\Exception $e) { 
+            $errorCode = $e->getCode();
+            
+            if ($errorCode === 0) {
+                
+            }
             Session::flash('error', $e->getMessage());
             return back()->withInput();
         }
