@@ -5,23 +5,18 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use App\Models\User;
-use App\Services\UserService;
-use App\Rules\EmailAlreadyExistRule;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Kreait\Firebase\Auth as FirebaseAuth;
 use Kreait\Firebase\Exception\FirebaseException;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\RegisterRequest;
+use Illuminate\Validation\ValidationException;
+use Session;
 
 class RegisterController extends Controller
 {
-
-    protected $userService;
     /*
     |--------------------------------------------------------------------------
     | Register Controller
@@ -34,23 +29,40 @@ class RegisterController extends Controller
     */
 
     use RegistersUsers;
+    protected $auth;
 
-    public function __construct()
-    {
-        $this->middleware('guest');
-        $this->userService = new UserService;
+    /**
+     * Where to redirect users after registration.
+     *
+     * @var string
+     */
+     protected $redirectTo = RouteServiceProvider::HOME;
+    public function __construct(FirebaseAuth $auth) {
+       $this->middleware('guest');
+       $this->auth = $auth;
     }
-
-    protected function register(RegisterRequest $request)
-    {
-        try {
-            $createdUser = $this->userService->createUser($request->name, $request->email, $request->password);
-            return redirect()->route('login')->with('status', 'Successfully registered');
-        } catch (\Exception $e) {
-            $errorCode = $e->getCode();
-
-            Session::flash('error', $e->getMessage());
-            return back()->withInput();
-        }
+    protected function validator(array $data) {
+       return Validator::make($data, [
+          'name' => ['required', 'string', 'max:255'],
+          'email' => ['required', 'string', 'email', 'max:255'],
+          'password' => ['required', 'string', 'min:8', 'max:12', 'confirmed'],
+       ]);
     }
-}
+    protected function register(Request $request) {
+       try {
+         $this->validator($request->all())->validate();
+         $userProperties = [
+            'email' => $request->input('email'),
+            'emailVerified' => false,
+            'password' => $request->input('password'),
+            'displayName' => $request->input('name'),
+            'disabled' => false,
+         ];
+         $createdUser = $this->auth->createUser($userProperties);
+         return redirect()->route('login');
+       } catch (FirebaseException $e) {
+          Session::flash('error', $e->getMessage());
+          return back()->withInput();
+       }
+    }
+ }
